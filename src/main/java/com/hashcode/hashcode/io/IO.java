@@ -46,7 +46,7 @@ public class IO {
 			String header = myReader.nextLine();
 			String[] headerParts = header.split(" ");
 			int librariesNb = Integer.parseInt(headerParts[1]);
-			time.days = Integer.parseInt(headerParts[2]);
+			time.setDays(Integer.parseInt(headerParts[2]));
 			List<Book> books = new ArrayList<>();
 
 			// Read book scores.
@@ -59,16 +59,16 @@ public class IO {
 			for (int i = 0; i < librariesNb; i++) {
 				String[] libraryParts = myReader.nextLine().split(" ");
 				Library library = new Library();
-				library.id = i;
-				library.signUpProcess = Integer.parseInt(libraryParts[1]);
-				library.maxBooks = Integer.parseInt(libraryParts[2]);
+				library.setId(i);
+				library.setSignUpProcess(Integer.parseInt(libraryParts[1]));
+				library.setMaxBooks(Integer.parseInt(libraryParts[2]));
 
 				// Read books.
 				String[] bookParts = myReader.nextLine().split(" ");
 				for (String book : bookParts) {
 					Book b = books.get(Integer.parseInt(book));
-					library.books.add(b);
-					library.totalScore += b.score;
+					library.getBooks().add(b);
+					library.setTotalScore(library.getTotalScore() + b.getScore());
 				}
 				libraries.add(library);
 			}
@@ -89,13 +89,13 @@ public class IO {
 		//Creating a File object
 		File file = new File(OUTPUTS_PATH + folderName);
 		//Creating the directory
-		boolean created = file.mkdir();
-		if (created) {
+		boolean isCreated = file.mkdir();
+		if (isCreated) {
 			log.info("Directory {} created successfully", folderName);
 		} else {
 			log.error("Sorry couldn't create directory {}", folderName);
 		}
-		return created;
+		return isCreated;
 	}
 
 	/**
@@ -117,12 +117,12 @@ public class IO {
 					myWriter.write(System.getProperty(LINE_SEPARATOR));
 					for (Library library : libraries) {
 						// Write number of books.
-						myWriter.write(library.id + " " + library.books.size());
+						myWriter.write(library.getId() + " " + library.getBooks().size());
 						myWriter.write(System.getProperty(LINE_SEPARATOR));
 						// Write books.
 						StringBuilder books = new StringBuilder();
-						for (Book book : library.books) {
-							books.append(book.id).append(" ");
+						for (Book book : library.getBooks()) {
+							books.append(book.getId()).append(" ");
 						}
 						books = new StringBuilder(removeLastCharacter(books.toString()));
 						myWriter.write(books.toString());
@@ -148,7 +148,7 @@ public class IO {
 	 * @param str the string from which the last character must be removed.
 	 * @return the <code>String</code> without the last character.
 	 */
-	public static String removeLastCharacter(String str) {
+	private static String removeLastCharacter(String str) {
 		return Optional.ofNullable(str)
 				.filter(sStr -> sStr.length() != 0)
 				.map(sStr -> sStr.substring(0, sStr.length() - 1))

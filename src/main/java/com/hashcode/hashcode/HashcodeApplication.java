@@ -26,7 +26,8 @@ public class HashcodeApplication {
 
 		// Create the folder that will contain the output files.
 		String folderName = Long.toString(new Timestamp(System.currentTimeMillis()).getTime());
-		if (IO.createFolder(folderName)) {
+		boolean isCreated = IO.createFolder(folderName);
+		if (isCreated) {
 			List<Library> libraries = new ArrayList<>();
 			Time time = new Time();
 
@@ -34,8 +35,8 @@ public class HashcodeApplication {
 				// Fill libraries list and time from the input file.
 				IO.readFile(libraries, time, fileName);
 
-				// Run the algorithm.
-				List<Library> result = new Algo().run(libraries, time);
+				// Run the simulation.
+				List<Library> result = new Simulation().run(libraries, time);
 
 				// Generate the output file from resulting libraries.
 				IO.writeFile(result, folderName, fileName);

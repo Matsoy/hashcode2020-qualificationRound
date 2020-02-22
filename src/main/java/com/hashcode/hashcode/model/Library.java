@@ -1,22 +1,31 @@
 package com.hashcode.hashcode.model;
 
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@FieldDefaults(level = AccessLevel.PUBLIC)
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @EqualsAndHashCode
 @ToString
 public class Library implements Comparable<Library> {
-	Integer id = 0;
-	List<Book> books = new ArrayList<>();
-	Integer maxBooks = 0;
-	Integer signUpProcess = 0;
-	Integer totalScore = 0;
+	private Integer id = 0;
+	private List<Book> books = new ArrayList<>();
+	private Integer maxBooks = 0;
+	private Integer signUpProcess = 0;
+	private Integer totalScore = 0;
+
+	/**
+	 * Method to update <code>totalScore</code> attribute.
+	 */
+	public void updateTotalScore() {
+		this.totalScore = this.books.stream()
+				.mapToInt(Book::getScore)
+				.sum();
+	}
 
 	@Override
 	public int compareTo(Library o) {

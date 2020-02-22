@@ -7,7 +7,7 @@ import com.hashcode.hashcode.model.Time;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Algo {
+public class Simulation {
 	public List<Library> run(List<Library> libraries, Time time) {
 		// The libraries list used to generate the output file.
 		List<Library> librariesResult = new ArrayList<>();
@@ -18,6 +18,9 @@ public class Algo {
 		// Remove duplicated books.
 		removeDuplicateBooks(libraries);
 
+		// Update the sum of the scores of the books.
+		libraries.forEach(Library::updateTotalScore);
+
 		// Sort libraries a second time.
 		Collections.sort(libraries);
 
@@ -25,26 +28,26 @@ public class Algo {
 		int currentDay = 0;
 
 		for (Library library : libraries) {
-			currentDay += library.signUpProcess;
+			currentDay += library.getSignUpProcess();
 			Library newLibrary = new Library();
-			newLibrary.id = library.id;
-			newLibrary.totalScore = library.totalScore;
+			newLibrary.setId(library.getId());
+			newLibrary.setTotalScore(library.getTotalScore());
 
 			int bookIndex = 0;
 			// Can scan maxBooks books per day.
-			for (int i = 0; i < library.maxBooks; i++) {
+			for (int i = 0; i < library.getMaxBooks(); i++) {
 				// For each available days after the sign up process.
-				for (int j = library.signUpProcess; j < time.days; j++) {
+				for (int j = library.getSignUpProcess(); j < time.getDays(); j++) {
 					bookIndex++;
 					// If all the books in this library have already been scanned.
-					if (library.books.size() <= bookIndex) {
+					if (library.getBooks().size() <= bookIndex) {
 						break;
 					} else {
-						newLibrary.books.add(library.books.get(bookIndex));
+						newLibrary.getBooks().add(library.getBooks().get(bookIndex));
 					}
 				}
 				// If all the books in this library have already been shipped.
-				if (library.books.size() <= bookIndex) {
+				if (library.getBooks().size() <= bookIndex) {
 					break;
 				}
 			}
@@ -52,7 +55,7 @@ public class Algo {
 			librariesResult.add(newLibrary);
 
 			// If we have passed the last day on which the books can be sent to the scanning facility.
-			if (currentDay >= time.days) {
+			if (currentDay >= time.getDays()) {
 				break;
 			}
 		}
@@ -65,9 +68,9 @@ public class Algo {
 	 *
 	 * @param libraries the libraries.
 	 */
-	public void removeDuplicateBooks(List<Library> libraries) {
+	private void removeDuplicateBooks(List<Library> libraries) {
 		List<List<Book>> booksWithoutDuplication = libraries.stream()
-				.map(library -> library.books)
+				.map(Library::getBooks)
 				.collect(Collectors.toList());
 
 		// Keep track of books we've already seen.
@@ -85,10 +88,10 @@ public class Algo {
 			}
 		}
 
-		// Update libraries.
+		// Update libraries from the list of books without applications.
 		for (int i = 0; i < libraries.size(); i++) {
 			Library library = libraries.get(i);
-			library.books = booksWithoutDuplication.get(i);
+			library.setBooks(booksWithoutDuplication.get(i));
 		}
 	}
 }

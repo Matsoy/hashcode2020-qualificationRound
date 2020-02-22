@@ -1,14 +1,14 @@
 package com.hashcode.hashcode.model;
 
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 
-@FieldDefaults(level = AccessLevel.PUBLIC)
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @EqualsAndHashCode
 @ToString
 public class Book {
-	Integer id = 0;
-	Integer score = 0;
+	private Integer id = 0;
+	private Integer score = 0;
 }
