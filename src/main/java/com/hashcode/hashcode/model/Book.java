@@ -9,6 +9,6 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode
 @ToString
 public class Book {
-    Integer id = 0;
-    Integer score = 0;
+	Integer id = 0;
+	Integer score = 0;
 }

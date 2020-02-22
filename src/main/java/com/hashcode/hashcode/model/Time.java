@@ -9,5 +9,5 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode
 @ToString
 public class Time {
-    Integer days = 0;
+	Integer days = 0;
 }
