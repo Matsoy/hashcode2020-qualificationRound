@@ -61,14 +61,14 @@ public class IO {
 				Library library = new Library();
 				library.setId(i);
 				library.setSignUpProcess(Integer.parseInt(libraryParts[1]));
-				library.setMaxBooks(Integer.parseInt(libraryParts[2]));
+				library.setBooksPerDay(Integer.parseInt(libraryParts[2]));
 
 				// Read books.
 				String[] bookParts = myReader.nextLine().split(" ");
 				for (String book : bookParts) {
 					Book b = books.get(Integer.parseInt(book));
 					library.addBook(b);
-					library.setTotalScore(library.getTotalScore() + b.getScore());
+					library.setScore(library.getScore() + b.getScore());
 				}
 				libraries.add(library);
 			}
@@ -87,15 +87,32 @@ public class IO {
 	public static void writeOutputFile(List<Library> libraries, String folderName, String fileName) {
 		// Create the output file.
 		File file = new File(OUTPUTS_PATH + folderName, fileName + FILE_EXTENSION);
+		int line = 0;
 		if (createFile(file)) {
 			try (FileWriter myWriter = new FileWriter(file)) {
 				// Write number of libraries.
 				myWriter.write("" + libraries.size());
+				line++;
+				if(line == 28089){
+					boolean ici = true;
+				}
 				myWriter.write(System.getProperty(LINE_SEPARATOR));
+				line++;
+				if(line == 28089){
+					boolean ici = true;
+				}
 				for (Library library : libraries) {
 					// Write number of books.
 					myWriter.write(library.getId() + " " + library.getBooks().size());
+					line++;
+					if(line == 28089){
+						boolean ici = true;
+					}
 					myWriter.write(System.getProperty(LINE_SEPARATOR));
+					line++;
+					if(line == 28089){
+						boolean ici = true;
+					}
 					// Write books.
 					StringBuilder books = new StringBuilder();
 					for (Book book : library.getBooks()) {
@@ -103,7 +120,15 @@ public class IO {
 					}
 					books = new StringBuilder(removeLastCharacter(books.toString()));
 					myWriter.write(books.toString());
+					line++;
+					if(line == 28089){
+						boolean ici = true;
+					}
 					myWriter.write(System.getProperty(LINE_SEPARATOR));
+					line++;
+					if(line == 28089){
+						boolean ici = true;
+					}
 				}
 				log.info("Successfully wrote to the file.");
 

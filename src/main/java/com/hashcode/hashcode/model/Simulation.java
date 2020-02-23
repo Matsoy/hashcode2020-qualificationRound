@@ -51,8 +51,8 @@ public class Simulation {
 				.filter(l -> !l.getBooks().isEmpty())
 				.collect(Collectors.toList());
 
-		// Update totalScore.
-		libraries.forEach(Library::updateTotalScore);
+		// Update library score.
+		libraries.forEach(Library::updateScore);
 
 		// Sort libraries a second time.
 		Collections.sort(libraries);
@@ -83,6 +83,14 @@ public class Simulation {
 			}
 		}
 
+		// Remove libraries that have run out of books.
+		result = result.stream()
+				.filter(l -> !l.getBooks().isEmpty())
+				.collect(Collectors.toList());
+
+		// Sort libraries.
+		Collections.sort(result);
+
 		return result;
 	}
 
@@ -111,7 +119,7 @@ public class Simulation {
 			}
 		}
 
-		// Update libraries from the list of books without applications.
+		// Update libraries from the list of books without duplication.
 		for (int i = 0; i < libraries.size(); i++) {
 			Library library = libraries.get(i);
 			library.setBooks(booksWithoutDuplication.get(i));
@@ -127,11 +135,11 @@ public class Simulation {
 	private Library getOutputLibrary(Library library) {
 		Library outputLibrary = new Library();
 		outputLibrary.setId(library.getId());
-		outputLibrary.setTotalScore(library.getTotalScore());
+		outputLibrary.setScore(library.getScore());
 
 		int bookIndex = 0;
 		// Can scan maxBooks books per day.
-		for (int i = 0; i < library.getMaxBooks(); i++) {
+		for (int i = 0; i < library.getBooksPerDay(); i++) {
 			// For each available days after the sign up process.
 			for (int j = library.getSignUpProcess(); j < this.time; j++) {
 				// If all the books in this library have already been scanned.

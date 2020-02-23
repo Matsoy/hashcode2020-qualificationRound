@@ -15,15 +15,15 @@ import java.util.List;
 public class Library implements Comparable<Library> {
 	private Integer id = 0;
 	private List<Book> books = new ArrayList<>();
-	private Integer maxBooks = 0;
+	private Integer booksPerDay = 0;
 	private Integer signUpProcess = 0;
-	private Integer totalScore = 0;
+	private Integer score = 0;
 
 	/**
-	 * Method to update <code>totalScore</code> attribute.
+	 * Method to update <code>score</code> attribute.
 	 */
-	public void updateTotalScore() {
-		this.totalScore = this.books.stream()
+	public void updateScore() {
+		this.score = this.books.stream()
 				.mapToInt(Book::getScore)
 				.sum();
 	}
@@ -61,10 +61,10 @@ public class Library implements Comparable<Library> {
 			return signUpProcessComparison;
 		}
 
-		// Sort libraries by descending totalScore.
-		int totalScoreComparison = o.totalScore.compareTo(this.totalScore);
-		if (totalScoreComparison != 0) {
-			return totalScoreComparison;
+		// Sort libraries by descending score.
+		int scoreComparison = o.score.compareTo(this.score);
+		if (scoreComparison != 0) {
+			return scoreComparison;
 		}
 
 		// Sort libraries by descending number of books.
