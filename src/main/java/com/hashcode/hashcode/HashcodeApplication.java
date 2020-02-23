@@ -2,7 +2,7 @@ package com.hashcode.hashcode;
 
 import com.hashcode.hashcode.io.IO;
 import com.hashcode.hashcode.model.Library;
-import com.hashcode.hashcode.model.Time;
+import com.hashcode.hashcode.model.Simulation;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -28,18 +28,18 @@ public class HashcodeApplication {
 		String folderName = Long.toString(new Timestamp(System.currentTimeMillis()).getTime());
 		boolean isCreated = IO.createFolder(folderName);
 		if (isCreated) {
-			List<Library> libraries = new ArrayList<>();
-			Time time = new Time();
-
 			fileNames.forEach(fileName -> {
-				// Fill libraries list and time from the input file.
-				IO.readFile(libraries, time, fileName);
+				List<Library> libraries = new ArrayList<>();
+				Simulation simulation = new Simulation();
+
+				// Fill simulation and libraries list instances from the input file.
+				IO.readInputFile(simulation, libraries, fileName);
 
 				// Run the simulation.
-				List<Library> result = new Simulation().run(libraries, time);
+				List<Library> result = simulation.run(libraries);
 
 				// Generate the output file from resulting libraries.
-				IO.writeFile(result, folderName, fileName);
+				IO.writeOutputFile(result, folderName, fileName);
 			});
 		}
 	}

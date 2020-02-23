@@ -2,7 +2,7 @@ package com.hashcode.hashcode.io;
 
 import com.hashcode.hashcode.model.Book;
 import com.hashcode.hashcode.model.Library;
-import com.hashcode.hashcode.model.Time;
+import com.hashcode.hashcode.model.Simulation;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +34,11 @@ public class IO {
 	/**
 	 * Method to read the output file.
 	 *
-	 * @param libraries the libraries.
-	 * @param time      the time.
-	 * @param fileName  the input file name.
+	 * @param libraries  the libraries.
+	 * @param simulation the simulation instance.
+	 * @param fileName   the input file name.
 	 */
-	public static void readFile(List<Library> libraries, Time time, String fileName) {
+	public static void readInputFile(Simulation simulation, List<Library> libraries, String fileName) {
 		String filePath = INPUTS_FOLDER + fileName + FILE_EXTENSION;
 
 		try (Scanner myReader = new Scanner(new File(filePath))) {
@@ -46,7 +46,7 @@ public class IO {
 			String header = myReader.nextLine();
 			String[] headerParts = header.split(" ");
 			int librariesNb = Integer.parseInt(headerParts[1]);
-			time.setDays(Integer.parseInt(headerParts[2]));
+			simulation.setTime(Integer.parseInt(headerParts[2]));
 			List<Book> books = new ArrayList<>();
 
 			// Read book scores.
@@ -67,7 +67,7 @@ public class IO {
 				String[] bookParts = myReader.nextLine().split(" ");
 				for (String book : bookParts) {
 					Book b = books.get(Integer.parseInt(book));
-					library.getBooks().add(b);
+					library.addBook(b);
 					library.setTotalScore(library.getTotalScore() + b.getScore());
 				}
 				libraries.add(library);
@@ -75,6 +75,41 @@ public class IO {
 
 		} catch (FileNotFoundException e) {
 			log.error(ERROR_OCCURRED, e);
+		}
+	}
+
+	/**
+	 * Method to generate the output file.
+	 *
+	 * @param libraries the libraries ordered in writing order.
+	 * @param fileName  the output file name.
+	 */
+	public static void writeOutputFile(List<Library> libraries, String folderName, String fileName) {
+		// Create the output file.
+		File file = new File(OUTPUTS_PATH + folderName, fileName + FILE_EXTENSION);
+		if (createFile(file)) {
+			try (FileWriter myWriter = new FileWriter(file)) {
+				// Write number of libraries.
+				myWriter.write("" + libraries.size());
+				myWriter.write(System.getProperty(LINE_SEPARATOR));
+				for (Library library : libraries) {
+					// Write number of books.
+					myWriter.write(library.getId() + " " + library.getBooks().size());
+					myWriter.write(System.getProperty(LINE_SEPARATOR));
+					// Write books.
+					StringBuilder books = new StringBuilder();
+					for (Book book : library.getBooks()) {
+						books.append(book.getId()).append(" ");
+					}
+					books = new StringBuilder(removeLastCharacter(books.toString()));
+					myWriter.write(books.toString());
+					myWriter.write(System.getProperty(LINE_SEPARATOR));
+				}
+				log.info("Successfully wrote to the file.");
+
+			} catch (IOException e) {
+				log.error(ERROR_OCCURRED, e);
+			}
 		}
 	}
 
@@ -99,47 +134,26 @@ public class IO {
 	}
 
 	/**
-	 * Method to generate the output file.
+	 * Method to create the output file.
 	 *
-	 * @param libraries the libraries ordered in writing order.
-	 * @param fileName  the output file name.
+	 * @param file the file to create.
+	 * @return <code>true</code> if the file is created;
+	 * * <code>false</code> otherwise.
 	 */
-	public static void writeFile(List<Library> libraries, String folderName, String fileName) {
-		File file = new File(OUTPUTS_PATH + folderName, fileName + FILE_EXTENSION); // Compliant
-
+	private static boolean createFile(File file) {
+		boolean isCreated = false;
 		try {
-			if (file.createNewFile()) {
-				log.info("File created: {}", file.getPath());
-
-				try (FileWriter myWriter = new FileWriter(file)) {
-					// Write number of libraries.
-					myWriter.write("" + libraries.size());
-					myWriter.write(System.getProperty(LINE_SEPARATOR));
-					for (Library library : libraries) {
-						// Write number of books.
-						myWriter.write(library.getId() + " " + library.getBooks().size());
-						myWriter.write(System.getProperty(LINE_SEPARATOR));
-						// Write books.
-						StringBuilder books = new StringBuilder();
-						for (Book book : library.getBooks()) {
-							books.append(book.getId()).append(" ");
-						}
-						books = new StringBuilder(removeLastCharacter(books.toString()));
-						myWriter.write(books.toString());
-						myWriter.write(System.getProperty(LINE_SEPARATOR));
-					}
-					log.info("Successfully wrote to the file.");
-
-				} catch (IOException e) {
-					log.error(ERROR_OCCURRED, e);
-				}
+			isCreated = file.createNewFile();
+			if (isCreated) {
+				log.info("File {} created successfully", file.getPath());
 			} else {
-				log.error("File already exists.");
+				log.error("File {} already exists.", file.getPath());
 			}
-
 		} catch (IOException e) {
 			log.error(ERROR_OCCURRED, e);
 		}
+
+		return isCreated;
 	}
 
 	/**

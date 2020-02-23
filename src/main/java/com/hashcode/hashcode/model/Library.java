@@ -27,6 +27,16 @@ public class Library implements Comparable<Library> {
 				.sum();
 	}
 
+	/**
+	 * Method to add a book to the list of books.
+	 *
+	 * @param book the book to add to the list of books.
+	 */
+	public void addBook(Book book) {
+		this.books.add(book);
+	}
+
+
 	@Override
 	public int compareTo(Library o) {
 		// Sort libraries by ascending signUpProcess.
