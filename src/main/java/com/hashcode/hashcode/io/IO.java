@@ -3,8 +3,6 @@ package com.hashcode.hashcode.io;
 import com.hashcode.hashcode.model.Book;
 import com.hashcode.hashcode.model.Library;
 import com.hashcode.hashcode.model.Simulation;
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -16,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
-@FieldDefaults(level = AccessLevel.PUBLIC)
 @Slf4j
 public class IO {
 	static final String INPUTS_FOLDER = "inputs\\";
@@ -106,7 +103,6 @@ public class IO {
 					myWriter.write(System.getProperty(LINE_SEPARATOR));
 				}
 				log.info("Successfully wrote to the file.");
-
 			} catch (IOException e) {
 				log.error(ERROR_OCCURRED, e);
 			}
@@ -121,9 +117,9 @@ public class IO {
 	 * <code>false</code> otherwise.
 	 */
 	public static boolean createFolder(String folderName) {
-		//Creating a File object
+		// Creating a File object.
 		File file = new File(OUTPUTS_PATH + folderName);
-		//Creating the directory
+		// Creating the directory.
 		boolean isCreated = file.mkdir();
 		if (isCreated) {
 			log.info("Directory {} created successfully", folderName);
