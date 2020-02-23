@@ -3,6 +3,7 @@ package com.hashcode.hashcode.model;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @NoArgsConstructor
@@ -34,6 +35,21 @@ public class Library implements Comparable<Library> {
 	 */
 	public void addBook(Book book) {
 		this.books.add(book);
+	}
+
+	/**
+	 * Method to sort le list of books.
+	 *
+	 * @param comparator   the comparator.
+	 * @param reverseOrder <code>true</code> if to reverse the sort order;
+	 *                     * <code>false</code> otherwise.
+	 */
+	public void sortBooks(Comparator<Book> comparator, boolean reverseOrder) {
+		this.books.sort(
+				reverseOrder ?
+						comparator.reversed() :
+						comparator
+		);
 	}
 
 

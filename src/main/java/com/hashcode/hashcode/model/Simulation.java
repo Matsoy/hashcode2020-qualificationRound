@@ -37,8 +37,19 @@ public class Simulation {
 		// Sort libraries according to compareTo method.
 		Collections.sort(libraries);
 
+		// For each libraries, sort its books by descending score.
+		Comparator<Book> compareScores = Comparator.comparing(Book::getScore);
+		libraries.forEach(
+				l -> l.sortBooks(compareScores, true)
+		);
+
 		// Remove duplicated books.
 		removeDuplicateBooks(libraries);
+
+		// Remove libraries that have run out of books.
+		libraries = libraries.stream()
+				.filter(l -> !l.getBooks().isEmpty())
+				.collect(Collectors.toList());
 
 		// Update totalScore.
 		libraries.forEach(Library::updateTotalScore);
@@ -123,13 +134,13 @@ public class Simulation {
 		for (int i = 0; i < library.getMaxBooks(); i++) {
 			// For each available days after the sign up process.
 			for (int j = library.getSignUpProcess(); j < this.time; j++) {
-				bookIndex++;
 				// If all the books in this library have already been scanned.
 				if (library.getBooks().size() <= bookIndex) {
 					break;
 				} else {
 					outputLibrary.addBook(library.getBooks().get(bookIndex));
 				}
+				bookIndex++;
 			}
 			// If all the books in this library have already been shipped.
 			if (library.getBooks().size() <= bookIndex) {
