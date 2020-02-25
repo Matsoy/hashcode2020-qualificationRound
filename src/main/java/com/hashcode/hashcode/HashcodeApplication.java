@@ -3,6 +3,7 @@ package com.hashcode.hashcode;
 import com.hashcode.hashcode.io.IO;
 import com.hashcode.hashcode.model.Library;
 import com.hashcode.hashcode.model.Simulation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,7 +14,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+@Slf4j
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class HashcodeApplication {
@@ -28,19 +31,26 @@ public class HashcodeApplication {
 		String folderName = Long.toString(new Timestamp(System.currentTimeMillis()).getTime());
 		boolean isCreated = IO.createFolder(folderName);
 		if (isCreated) {
+			AtomicInteger totalScore = new AtomicInteger();
 			fileNames.forEach(fileName -> {
 				List<Library> libraries = new ArrayList<>();
+				List<Integer> bookScores = new ArrayList<>();
 				Simulation simulation = new Simulation();
 
 				// Fill simulation and libraries list instances from the input file.
-				IO.readInputFile(simulation, libraries, fileName);
+				IO.readInputFile(simulation, libraries, bookScores, fileName);
 
 				// Run the simulation.
-				List<Library> result = simulation.run(libraries);
+				int score = simulation.run(libraries);
+				totalScore.addAndGet(score);
 
 				// Generate the output file from resulting libraries.
-				IO.writeOutputFile(result, folderName, fileName);
+				IO.writeOutputFile(libraries, folderName, fileName, totalScore.get());
 			});
+
+			log.info("############################");
+			log.info("Score : {}", totalScore.get());
+			log.info("############################");
 		}
 	}
 }

@@ -18,14 +18,14 @@ public class Simulation {
 	 * Method to run the run the algorithm.
 	 *
 	 * @param libraries the libraries.
-	 * @return the sublist of libraries used to generate the output file.
+	 * @return the score.
 	 */
-	public List<Library> run(List<Library> libraries) {
+	public int run(List<Library> libraries) {
 		// Manipulate the libraries to maximize the final score.
-		manipulateLibraries(libraries);
+		orderLibrariesAndBooks(libraries);
 
-		// Get libraries ready to generate the output file.
-		return this.prepareLibraries(libraries);
+		// Prepare libraries generate the output file.
+		return prepareLibraries(libraries);
 	}
 
 	/**
@@ -33,7 +33,7 @@ public class Simulation {
 	 *
 	 * @param libraries the libraries.
 	 */
-	private void manipulateLibraries(List<Library> libraries) {
+	private void orderLibrariesAndBooks(List<Library> libraries) {
 		// Sort libraries according to compareTo method.
 		Collections.sort(libraries);
 
@@ -42,20 +42,6 @@ public class Simulation {
 		libraries.forEach(
 				l -> l.sortBooks(compareScores, true)
 		);
-
-		// Remove duplicated books.
-		removeDuplicateBooks(libraries);
-
-		// Remove libraries that have run out of books.
-		libraries = libraries.stream()
-				.filter(l -> !l.getBooks().isEmpty())
-				.collect(Collectors.toList());
-
-		// Update library score.
-		libraries.forEach(Library::updateScore);
-
-		// Sort libraries a second time.
-		Collections.sort(libraries);
 	}
 
 	/**
@@ -64,98 +50,80 @@ public class Simulation {
 	 * @param libraries the libraries.
 	 * @
 	 */
-	private List<Library> prepareLibraries(List<Library> libraries) {
-		// The libraries list used to generate the output file.
-		List<Library> result = new ArrayList<>();
-		// The current day of the simulation.
-		int currentDay = 0;
+	private int prepareLibraries(List<Library> libraries) {
+		// Result map. library id -> books
+		LinkedHashMap<Integer, LinkedList<Book>> resultMap = new LinkedHashMap<>();
+		libraries.forEach(library -> resultMap.put(
+				library.getId(),
+				new LinkedList<>()
+		));
+
+		// Map to iterate on. library -> books
+		Map<Library, List<Book>> allBooksMap = new LinkedHashMap<>();
 
 		for (Library library : libraries) {
-			// Increment current day.
-			currentDay += library.getSignUpProcess();
-			// Prepare a library instance to the output file from a given library.
-			Library newLibrary = getOutputLibrary(library);
-			result.add(newLibrary);
+			// Clear lists because useless.
+			library.setBooksWithoutDuplications(null);
+			allBooksMap.put(library, new LinkedList<>(library.getBooks()));
+		}
 
-			// If we have passed the last day on which the books can be sent to the scanning facility.
-			if (currentDay >= this.time) {
-				break;
+		// Add null books to simulate the sign up process.
+		int offset = 0;
+		for (Library library : allBooksMap.keySet()) {
+			offset += library.getSignUpProcess();
+			for (int i = 0; i < offset; i++) {
+				((LinkedList<Book>) allBooksMap.get(library)).addFirst(null);
 			}
 		}
 
-		// Remove libraries that have run out of books.
-		result = result.stream()
-				.filter(l -> !l.getBooks().isEmpty())
-				.collect(Collectors.toList());
+		Set<Book> scannedBooks = new HashSet<>();
+		// For each day
+		for (int day = 0; day < this.time; day++) {
+			// For each library
+			Iterator<Library> it = allBooksMap.keySet().iterator();
+			while (it.hasNext()) {
+				// Key.
+				Library library = it.next();
+				// Value.
+				List<Book> books = allBooksMap.get(library);
 
-		// Sort libraries.
-		Collections.sort(result);
+				int booksPerDay = library.getBooksPerDay();
 
-		return result;
-	}
-
-	/**
-	 * Method to remove duplicate books.
-	 *
-	 * @param libraries the libraries.
-	 */
-	private void removeDuplicateBooks(List<Library> libraries) {
-		List<List<Book>> booksWithoutDuplication = libraries.stream()
-				.map(Library::getBooks)
-				.collect(Collectors.toList());
-
-		// Keep track of books we've already seen.
-		Set<Book> bookCache = new HashSet<>();
-
-		// Iterate and remove if seen before
-		for (List<Book> list : booksWithoutDuplication) {
-			for (Iterator<Book> it = list.iterator(); it.hasNext(); ) {
-				Book book = it.next();
-				if (bookCache.contains(book)) {
+				int added = 0;
+				// Try to add "booksPerDay" books.
+				while (added < booksPerDay && !books.isEmpty()) {
+					Book book = ((LinkedList<Book>) books).pollFirst();
+					if (book == null) {
+						// If the library is not available.
+						added = booksPerDay;
+					} else if (scannedBooks.contains(book)) {
+						// If the same book has already been scanned.
+						books.remove(book);
+					} else {
+						// if it is a new book that has not already been scanned.
+						added++;
+						scannedBooks.add(book);
+						resultMap.get(library.getId()).addLast(book);
+					}
+				}
+				// If all the books in the library have been scanned
+				if (books.isEmpty()) {
 					it.remove();
-				} else {
-					bookCache.add(book);
 				}
 			}
 		}
 
-		// Update libraries from the list of books without duplication.
-		for (int i = 0; i < libraries.size(); i++) {
-			Library library = libraries.get(i);
-			library.setBooks(booksWithoutDuplication.get(i));
-		}
-	}
-
-	/**
-	 * Method to prepare a library instance to the output file from a given library.
-	 *
-	 * @param library the library.
-	 * @return the library instance created from the given library.
-	 */
-	private Library getOutputLibrary(Library library) {
-		Library outputLibrary = new Library();
-		outputLibrary.setId(library.getId());
-		outputLibrary.setScore(library.getScore());
-
-		int bookIndex = 0;
-		// Can scan maxBooks books per day.
-		for (int i = 0; i < library.getBooksPerDay(); i++) {
-			// For each available days after the sign up process.
-			for (int j = library.getSignUpProcess(); j < this.time; j++) {
-				// If all the books in this library have already been scanned.
-				if (library.getBooks().size() <= bookIndex) {
-					break;
-				} else {
-					outputLibrary.addBook(library.getBooks().get(bookIndex));
-				}
-				bookIndex++;
-			}
-			// If all the books in this library have already been shipped.
-			if (library.getBooks().size() <= bookIndex) {
-				break;
-			}
+		List<Library> libraryTmp = new ArrayList<>();
+		for (Map.Entry<Integer, LinkedList<Book>> entry : resultMap.entrySet()) {
+			libraryTmp.add(new Library(entry.getKey(), entry.getValue()));
 		}
 
-		return outputLibrary;
+		libraries = libraryTmp.stream()
+				.filter(library -> !library.getBooks().isEmpty())
+				.collect(Collectors.toList());
+
+		return scannedBooks.stream()
+				.mapToInt(Book::getScore)
+				.sum();
 	}
 }
