@@ -3,6 +3,7 @@ package com.hashcode.hashcode;
 import com.hashcode.hashcode.io.IO;
 import com.hashcode.hashcode.model.Library;
 import com.hashcode.hashcode.model.Simulation;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -34,18 +35,17 @@ public class HashcodeApplication {
 			AtomicInteger totalScore = new AtomicInteger();
 			fileNames.forEach(fileName -> {
 				List<Library> libraries = new ArrayList<>();
-				List<Integer> bookScores = new ArrayList<>();
 				Simulation simulation = new Simulation();
 
 				// Fill simulation and libraries list instances from the input file.
-				IO.readInputFile(simulation, libraries, bookScores, fileName);
+				IO.readInputFile(simulation, libraries, fileName);
 
 				// Run the simulation.
-				int score = simulation.run(libraries);
-				totalScore.addAndGet(score);
+				Pair<Integer, List<Library>> result = simulation.run(libraries);
+				totalScore.addAndGet(result.getKey());
 
 				// Generate the output file from resulting libraries.
-				IO.writeOutputFile(libraries, folderName, fileName, totalScore.get());
+				IO.writeOutputFile(result.getValue(), folderName, fileName, result.getKey());
 			});
 
 			log.info("############################");

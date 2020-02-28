@@ -17,7 +17,7 @@ public class IO {
 	static final String INPUTS_FOLDER = "inputs\\";
 	static final String OUTPUTS_PATH = "outputs\\";
 	static final String FILE_EXTENSION = ".txt";
-	static final String ERROR_OCCURRED = "An error occurred.";
+	static final String ERROR_OCCURRED = "An error occurred";
 	static final String LINE_SEPARATOR = "line.separator";
 
 	/**
@@ -30,11 +30,12 @@ public class IO {
 	 * Method to read the output file.
 	 *
 	 * @param libraries  the libraries.
-	 * @param bookScores the scores per book.
 	 * @param simulation the simulation instance.
 	 * @param fileName   the input file name.
 	 */
-	public static void readInputFile(Simulation simulation, List<Library> libraries, List<Integer> bookScores, String fileName) {
+	public static void readInputFile(Simulation simulation, List<Library> libraries, String fileName) {
+		log.info("readInputFile");
+
 		String filePath = INPUTS_FOLDER + fileName + FILE_EXTENSION;
 
 		try (Scanner myReader = new Scanner(new File(filePath))) {
@@ -46,10 +47,9 @@ public class IO {
 			List<Book> books = new ArrayList<>();
 
 			// Read book scores.
-			bookScores.addAll(Arrays.stream(myReader.nextLine().split(" "))
+			List<Integer> bookScores = Arrays.stream(myReader.nextLine().split(" "))
 					.map(Integer::parseInt)
-					.collect(Collectors.toList())
-			);
+					.collect(Collectors.toList());
 
 			for (int i = 0; i < bookScores.size(); i++) {
 				books.add(new Book(i, bookScores.get(i)));
@@ -61,6 +61,7 @@ public class IO {
 				Library library = new Library();
 				library.setId(i);
 				library.setSignUpProcess(Integer.parseInt(libraryParts[1]));
+				library.setOffset(Integer.parseInt(libraryParts[1]));
 				library.setBooksPerDay(Integer.parseInt(libraryParts[2]));
 
 				// Read books.
@@ -68,8 +69,8 @@ public class IO {
 				for (String book : bookParts) {
 					Book b = books.get(Integer.parseInt(book));
 					library.addBook(b);
-					library.setScore(library.getScore() + b.getScore());
 				}
+				library.updateScore();
 				libraries.add(library);
 			}
 
@@ -85,6 +86,8 @@ public class IO {
 	 * @param fileName  the output file name.
 	 */
 	public static void writeOutputFile(List<Library> libraries, String folderName, String fileName, int score) {
+		log.info("writeOutputFile");
+
 		log.info("############################");
 		log.info("{} : {}", fileName, score);
 		log.info("############################");
@@ -108,7 +111,7 @@ public class IO {
 					myWriter.write(books.toString());
 					myWriter.write(System.getProperty(LINE_SEPARATOR));
 				}
-				log.info("Successfully wrote to the file.");
+				log.info("Successfully wrote to the file");
 			} catch (IOException e) {
 				log.error(ERROR_OCCURRED, e);
 			}
@@ -140,7 +143,7 @@ public class IO {
 	 *
 	 * @param file the file to create.
 	 * @return <code>true</code> if the file is created;
-	 * * <code>false</code> otherwise.
+	 * <code>false</code> otherwise.
 	 */
 	private static boolean createFile(File file) {
 		boolean isCreated = false;
@@ -149,7 +152,7 @@ public class IO {
 			if (isCreated) {
 				log.info("File {} created successfully", file.getPath());
 			} else {
-				log.error("File {} already exists.", file.getPath());
+				log.error("File {} already exists", file.getPath());
 			}
 		} catch (IOException e) {
 			log.error(ERROR_OCCURRED, e);
@@ -169,43 +172,5 @@ public class IO {
 				.filter(sStr -> sStr.length() != 0)
 				.map(sStr -> sStr.substring(0, sStr.length() - 1))
 				.orElse(str);
-	}
-
-	/**
-	 * Method to compute the score of an input file.
-	 *
-	 * @param folderName the folder name.
-	 * @param fileName   the file name.
-	 * @param bookScores the list of scores per book.
-	 * @return the score of the given output file.
-	 */
-	public static int estimateScore(String folderName, String fileName, List<Integer> bookScores) {
-		File file = new File(OUTPUTS_PATH + folderName, fileName + FILE_EXTENSION);
-		int score = 0;
-		Set<Integer> bookIdsSet = new HashSet<>();
-		try (Scanner myReader = new Scanner(file)) {
-			myReader.nextLine();
-			while (myReader.hasNext()) {
-				myReader.nextLine();
-				String[] books = myReader.nextLine().split(" ");
-				for (String book : books) {
-					bookIdsSet.add(Integer.parseInt(book));
-				}
-			}
-			for (Integer bookId : bookIdsSet) {
-				score += bookScores.get(bookId);
-			}
-		} catch (FileNotFoundException e) {
-			log.error(ERROR_OCCURRED, e);
-		}
-
-		File newFile = new File(OUTPUTS_PATH + folderName, fileName + "_" + score + FILE_EXTENSION);
-		if (file.renameTo(newFile)) {
-			log.info("Rename successfully");
-		} else {
-			log.error("Rename failed");
-		}
-
-		return score;
 	}
 }

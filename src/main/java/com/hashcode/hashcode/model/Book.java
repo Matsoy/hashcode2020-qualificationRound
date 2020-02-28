@@ -6,9 +6,10 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString
 public class Book {
+	@EqualsAndHashCode.Include
 	private Integer id = 0;
 	private Integer score = 0;
 }
