@@ -3,7 +3,6 @@ package com.hashcode.hashcode.model;
 import lombok.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -34,13 +33,6 @@ public class Library implements Comparable<Library> {
 	public Library(Integer id, List<Book> books) {
 		this.id = id;
 		this.books = books;
-	}
-
-	public void addFirst(int times) {
-		this.books.addAll(
-				0,
-				new ArrayList<>(Collections.nCopies(times, null))
-		);
 	}
 
 	/**
@@ -91,15 +83,6 @@ public class Library implements Comparable<Library> {
 	}
 
 	/**
-	 * Method to add a book to the list of books.
-	 *
-	 * @param book the book to add to the list of books.
-	 */
-	public void removeBook(Book book) {
-		this.books.remove(book);
-	}
-
-	/**
 	 * Method to sort le list of books.
 	 *
 	 * @param comparator   the comparator.
@@ -124,14 +107,12 @@ public class Library implements Comparable<Library> {
 		}
 
 		// Sort libraries by descending score per day x the total number of books.
-		int size1 = (this.useBooksWithoutDuplications ? this.books : this.books).size();
-		int size2 = (o.isUseBooksWithoutDuplications() ? o.getBooks() : o.getBooks()).size();
 		Double scorePerDay1 = Double.valueOf(this.score) / (
-				(double) size1 / Double.valueOf(this.getBooksPerDay())
-		) * (double) size1;
+				(double) this.books.size() / Double.valueOf(this.getBooksPerDay())
+		) * (double) this.books.size();
 		Double scorePerDay2 = Double.valueOf(o.getScore()) / (
-				(double) size2 / Double.valueOf(o.getBooksPerDay())
-		) * (double) size2;
+				(double) o.getBooks().size() / Double.valueOf(o.getBooksPerDay())
+		) * (double) o.getBooks().size();
 		int scorePerDayComparison = scorePerDay2.compareTo(scorePerDay1);
 		if (scorePerDayComparison != 0) {
 			return scorePerDayComparison;

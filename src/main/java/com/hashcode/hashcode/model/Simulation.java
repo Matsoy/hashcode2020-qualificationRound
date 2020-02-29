@@ -162,7 +162,7 @@ public class Simulation {
 		}
 
 		log.info("Removing empty libraries");
-		libraries.removeIf(library -> !library.getBooks().isEmpty());
+		librariesTmp.removeIf(library -> library.getBooks().isEmpty());
 
 		return new Pair<>(
 				scannedBooks.stream()
