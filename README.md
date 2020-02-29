@@ -7,4 +7,4 @@ Hash Code 2020, Qualification Round - Book scanning
 `mvn clean install spring-boot:run`
 
 # Final scores
-![Final Score](final_score.png)
+![Final Score](scores.png)
